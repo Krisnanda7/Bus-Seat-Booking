@@ -83,7 +83,9 @@ export function getSeatId(busType: BusType, label: string): string {
  * Contoh: "bookedSeats-Regular-2026-08-15"
  */
 export function getBookedSeatsKey(busType: BusType, date: string): string {
-  return `bookedSeats-${busType}-${date}`;
+  // Storage key per busType + date, normalized to lowercase
+  // e.g. booked_seats_regular_2026-08-15
+  return `booked_seats_${busType.toLowerCase()}_${date}`;
 }
 
 // ── Design Tokens (dari DESIGN.md) ──────────────

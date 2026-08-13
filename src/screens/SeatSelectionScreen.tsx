@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Alert, Modal, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS, BUS_LAYOUT, getSeatLabel, getSeatPrice, getSeatId, getSeatPosition, MAX_SEATS_PER_BOOKING, FONT_FAMILY } from '../constants/busConfig';
 import { Seat, BusType, Booking, BookingItem } from '../types';
@@ -34,6 +34,8 @@ export default function SeatSelectionScreen() {
   const [busType, setBusType] = useState<BusType>('Regular');
   const [seats, setSeats] = useState<Seat[]>(() => generateSeats('Regular'));
   const [selectedSeatIds, setSelectedSeatIds] = useState<string[]>([]);
+  const [departureDate, setDepartureDate] = useState<string | null>(null); // ISO YYYY-MM-DD
+  const [isDateModalVisible, setIsDateModalVisible] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Temporary fixed departure date (matching header)
@@ -45,8 +47,16 @@ export default function SeatSelectionScreen() {
     setSelectedSeatIds([]);
   }, [busType]);
 
+  useEffect(() => {
+    // when date changes, reset selected seats and reload seat availability
+    setSelectedSeatIds([]);
+    setSeats(generateSeats(busType));
+  }, [departureDate, busType]);
+
   // Load booked seats from storage for the selected bus type & date
   useEffect(() => {
+    if (!departureDate) return; // nothing to load until a date selected
+
     let mounted = true;
     async function loadBooked() {
       try {
@@ -73,6 +83,11 @@ export default function SeatSelectionScreen() {
   }, [selectedSeats]);
 
   function handleSeatPress(seat: Seat) {
+    if (!departureDate) {
+      Alert.alert('Pilih tanggal', 'Pilih tanggal keberangkatan terlebih dahulu');
+      return;
+    }
+
     if (seat.status === 'booked') return; // cannot act on booked
 
     const isSelected = selectedSeatIds.includes(seat.id);
@@ -119,7 +134,7 @@ export default function SeatSelectionScreen() {
 
       await saveBooking(booking);
 
-      const autoReset = await markSeatsAsBooked(busType, departureDate, selectedSeatIds);
+      const autoReset = await markSeatsAsBooked(busType, departureDate as string, selectedSeatIds);
 
       if (autoReset) {
         // storage reset happened — refresh seats
@@ -139,6 +154,29 @@ export default function SeatSelectionScreen() {
     } finally {
       setIsProcessing(false);
     }
+  }
+
+  // Date picker list generator (next 30 days)
+  function getNextDates(days = 30) {
+    const list: { iso: string; label: string }[] = [];
+    const today = new Date();
+    for (let i = 0; i < days; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const iso = `${yyyy}-${mm}-${dd}`;
+      const label = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      list.push({ iso, label });
+    }
+    return list;
+  }
+
+  function formattedDepartureLabel() {
+    if (!departureDate) return 'Select Departure Date';
+    const d = new Date(departureDate + 'T00:00:00');
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
   return (
@@ -176,11 +214,37 @@ export default function SeatSelectionScreen() {
         </View>
 
         {/* 3. Date Picker Chip (Static) */}
-        <TouchableOpacity style={styles.dateChip}>
+        <TouchableOpacity style={styles.dateChip} onPress={() => setIsDateModalVisible(true)}>
           <Ionicons name="calendar-outline" size={20} color={COLORS.primary} />
-          <Text style={styles.dateChipText}>Select Departure Date</Text>
+          <Text style={styles.dateChipText}>{formattedDepartureLabel()}</Text>
           <Ionicons name="chevron-down" size={20} color={COLORS.neutral} />
         </TouchableOpacity>
+
+        <Modal visible={isDateModalVisible} animationType="slide" transparent>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Select Departure Date</Text>
+              <FlatList
+                data={getNextDates(30)}
+                keyExtractor={(item) => item.iso}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.dateItem}
+                    onPress={() => {
+                      setDepartureDate(item.iso);
+                      setIsDateModalVisible(false);
+                    }}
+                  >
+                    <Text style={styles.dateItemText}>{item.label}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+              <TouchableOpacity style={styles.modalClose} onPress={() => setIsDateModalVisible(false)}>
+                <Text style={styles.modalCloseText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
 
         {/* 4. Seat Legend */}
         <View style={styles.legendContainer}>
@@ -199,7 +263,7 @@ export default function SeatSelectionScreen() {
         </View>
 
         {/* 5. Seat Grid (Regular Class) */}
-        <View style={styles.busContainer}>
+        <View style={[styles.busContainer, !departureDate && styles.lockedBusContainer]}>
           <View style={styles.driverSection}>
             <Ionicons name="car-sport-outline" size={28} color={COLORS.neutral} />
           </View>
@@ -215,7 +279,7 @@ export default function SeatSelectionScreen() {
                 <TouchableOpacity
                   key={seat.id}
                   onPress={() => handleSeatPress(seat)}
-                  disabled={seat.status === 'booked'}
+                  disabled={seat.status === 'booked' || !departureDate}
                   style={[
                     styles.seat,
                     { backgroundColor: bg },
@@ -231,6 +295,11 @@ export default function SeatSelectionScreen() {
               );
             })}
           </View>
+            {!departureDate && (
+              <View style={styles.lockedOverlay} pointerEvents="none">
+                <Text style={styles.lockedText}>Pilih tanggal keberangkatan untuk melihat kursi</Text>
+              </View>
+            )}
         </View>
         
         {/* Spacer for bottom bar */}
@@ -466,5 +535,59 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: COLORS.primary,
     fontFamily: FONT_FAMILY,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: COLORS.surface,
+    maxHeight: '60%',
+    borderTopLeftRadius: BORDER_RADIUS.lg,
+    borderTopRightRadius: BORDER_RADIUS.lg,
+    padding: SPACING.md,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: SPACING.sm,
+    color: COLORS.textPrimary,
+  },
+  dateItem: {
+    paddingVertical: SPACING.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  dateItemText: {
+    fontSize: 14,
+    color: COLORS.textPrimary,
+  },
+  modalClose: {
+    marginTop: SPACING.md,
+    alignItems: 'center',
+  },
+  modalCloseText: {
+    color: COLORS.tertiary,
+    fontWeight: '700',
+  },
+  lockedBusContainer: {
+    opacity: 0.6,
+  },
+  lockedOverlay: {
+    position: 'absolute',
+    top: '40%',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+  },
+  lockedText: {
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.base,
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
   },
 });
