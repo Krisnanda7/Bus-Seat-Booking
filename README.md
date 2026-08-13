@@ -1,99 +1,101 @@
 # Bus Seat Booking (TrekBus)
 
-PENTING — Install / Unduh APK (utama)
+IMPORTANT — Install / Download APK (top)
 - Google Drive (APK): https://drive.google.com/REPLACE-WITH-YOUR-GDRIVE-LINK
 - GitHub repo: https://github.com/REPLACE-WITH-YOUR-GITHUB
 
 ---
 
-Penulis: I Dewa Gede Mas Bagus Krisnanda
+
+Author: I Dewa Gede Mas Bagus Krisnanda
 Email: baguskrisna424@gmail.com
 
-Deskripsi singkat
+Brief description
 -----------------
-Proyek ini adalah aplikasi mobile untuk pemesanan kursi bus (React Native + Expo). Aplikasi mendukung pemilihan tipe bus (Regular / Express), pemilihan tanggal, pemilihan kursi, penyimpanan booking secara lokal (AsyncStorage), dan riwayat penjualan.
+This project is a mobile application for bus seat booking (built with React Native + Expo). The app supports selecting bus type (Regular / Express), choosing a departure date, selecting seats, storing bookings locally using AsyncStorage, and viewing a simple sales history.
 
-Fitur utama
------------
-- Pilih tipe bus: Regular (20 kursi) atau Express (12 kursi)
-- Pemilihan tanggal keberangkatan (date picker)
-- Pilih / batal pilih kursi (maks. 5 kursi per transaksi)
-- Harga tampil secara real-time
-- Simpan booking secara lokal dan tampilkan riwayat penjualan
+Main features
+-------------
+- Choose bus type: Regular (20 seats) or Express (12 seats)
+- Select departure date (date picker)
+- Select / deselect seats (max 5 seats per transaction)
+- Live price updates based on selected seats
+- Save bookings locally and view sales history
 
-Prasyarat
----------
-- Node.js LTS
-- npm atau yarn
-- Expo CLI (opsional untuk development): `npm install -g expo-cli`
-- Jika membangun APK: EAS CLI (`npm install -g eas-cli`)
+Prerequisites
+-------------
+- Node.js (LTS recommended)
+- npm or yarn
+- Expo CLI (optional for development): `npm install -g expo-cli`
+- For building APK: EAS CLI (`npm install -g eas-cli`)
 
-Instalasi & Menjalankan (Development)
--------------------------------------
-1. Clone repository (atau unduh ZIP dari GitHub):
+Installation & Running (Development)
+-----------------------------------
+1. Clone the repository (or download ZIP from GitHub):
 
 ```bash
 git clone https://github.com/REPLACE-WITH-YOUR-GITHUB.git
 cd BusSeatBooking
 ```
 
-2. Pasang dependensi:
+2. Install dependencies:
 
 ```bash
 npm install
-# atau
+# or
 # yarn install
 ```
 
-3. Jalankan aplikasi (Expo web / perangkat):
+3. Start the app (Expo web / device):
 
 ```bash
 npx expo start
 ```
 
-Build APK (EAS - direkomendasikan)
----------------------------------
-1. Instal EAS CLI dan login:
+Build APK (EAS - recommended)
+----------------------------
+1. Install EAS CLI and login:
 
 ```bash
 npm install -g eas-cli
 eas login
 ```
 
-2. Siapkan konfigurasi EAS (jika belum):
+2. Configure EAS for this project (if not configured yet):
 
 ```bash
 eas build:configure
 ```
 
-3. Mulai build untuk Android (preview/debug APK):
+3. Start an Android build (preview/debug APK):
 
 ```bash
 eas build -p android --profile preview
 ```
 
-Setelah build selesai, unduh APK dari tautan yang disediakan oleh EAS atau unggah APK ke Google Drive untuk distribusi.
+After the build completes, download the APK from the provided EAS link or upload the APK to Google Drive for distribution.
 
-Catatan singkat: Jika Anda tidak ingin menggunakan EAS, jalankan `npx expo prebuild` lalu buka proyek native di Android Studio untuk membuat APK secara lokal.
+Note: If you prefer not to use EAS, run `npx expo prebuild` and open the native project in Android Studio to generate an APK locally.
 
-Struktur proyek (ringkas)
-------------------------
+Project structure (brief)
+-------------------------
 - `App.tsx` – entry point
-- `src/screens/SeatSelectionScreen.tsx` – layar pemilihan kursi
-- `src/screens/SalesHistoryScreen.tsx` – layar riwayat penjualan
-- `src/storage/bookingStorage.ts` – helper penyimpanan lokal
-- `src/constants/busConfig.ts` – konfigurasi layout, harga, warna, token desain
+- `src/screens/SeatSelectionScreen.tsx` – seat selection screen
+- `src/screens/SalesHistoryScreen.tsx` – sales history screen
+- `src/storage/bookingStorage.ts` – local storage helper
+- `src/constants/busConfig.ts` – layout, pricing, colors, design tokens
 
-Cara berkontribusi
-------------------
-1. Fork repository dan buat branch baru untuk fitur atau perbaikan.
-2. Buat pull request dengan deskripsi perubahan.
+How to contribute
+-----------------
+1. Fork the repository and create a new branch for your feature or fix.
+2. Open a pull request with a clear description of changes.
 
-Lisensi
+License
 -------
-Lisensi proyek ini: MIT (sesuaikan jika perlu).
+This project is licensed under the MIT License (adjust if needed).
 
-Catatan
--------
-- Ganti tautan Google Drive dan GitHub di bagian atas README dengan link yang benar agar cepat diakses.
-- Jika ingin, saya dapat membantu menautkan APK yang telah Anda unggah ke Google Drive dan memperbarui README secara langsung.
+Notes
+-----
+- Replace the Google Drive and GitHub links at the top of this README with the correct URLs for quick access.
+- I can help link an uploaded APK on Google Drive and update this README accordingly.
+
