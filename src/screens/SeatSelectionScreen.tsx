@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, BORDER_RADIUS, BUS_LAYOUT, getSeatLabel, getSeatPrice, getSeatId, getSeatPosition } from '../constants/busConfig';
+import { COLORS, SPACING, BORDER_RADIUS, BUS_LAYOUT, getSeatLabel, getSeatPrice, getSeatId, getSeatPosition, MAX_SEATS_PER_BOOKING, FONT_FAMILY } from '../constants/busConfig';
 import { Seat, BusType } from '../types';
 
 // ── Dummy Data Generator ────────────────────────
@@ -30,10 +30,51 @@ function generateSeats(busType: BusType): Seat[] {
 const DUMMY_REGULAR_SEATS = generateSeats('Regular');
 
 export default function SeatSelectionScreen() {
+  const [busType, setBusType] = useState<BusType>('Regular');
+  const [seats, setSeats] = useState<Seat[]>(() => generateSeats('Regular'));
+  const [selectedSeatIds, setSelectedSeatIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    // regenerate seats when bus type changes and clear selection
+    setSeats(generateSeats(busType));
+    setSelectedSeatIds([]);
+  }, [busType]);
+
+  const selectedSeats = useMemo(
+    () => seats.filter((s) => selectedSeatIds.includes(s.id)),
+    [seats, selectedSeatIds]
+  );
+
+  const totalPrice = useMemo(() => {
+    return selectedSeats.reduce((sum, s) => sum + s.price, 0);
+  }, [selectedSeats]);
+
+  function handleSeatPress(seat: Seat) {
+    if (seat.status === 'booked') return; // cannot act on booked
+
+    const isSelected = selectedSeatIds.includes(seat.id);
+
+    if (isSelected) {
+      // unselect
+      setSelectedSeatIds((prev) => prev.filter((id) => id !== seat.id));
+      setSeats((prev) => prev.map((s) => (s.id === seat.id ? { ...s, status: 'available' } : s)));
+      return;
+    }
+
+    // selecting
+    if (selectedSeatIds.length >= MAX_SEATS_PER_BOOKING) {
+      Alert.alert('Batas Maksimum', `Maksimum ${MAX_SEATS_PER_BOOKING} kursi per pemesanan`);
+      return;
+    }
+
+    setSelectedSeatIds((prev) => [...prev, seat.id]);
+    setSeats((prev) => prev.map((s) => (s.id === seat.id ? { ...s, status: 'selected' } : s)));
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        
+
         {/* 1. App Header & Trip Info */}
         <View style={styles.appHeaderRow}>
           <Text style={styles.appTitle}>TrekBus</Text>
@@ -48,14 +89,20 @@ export default function SeatSelectionScreen() {
           </View>
         </View>
 
-        {/* 2. Bus Type Toggle (Static) */}
+        {/* 2. Bus Type Toggle */}
         <View style={styles.toggleContainer}>
-          <View style={[styles.toggleButton, styles.toggleActive]}>
-            <Text style={[styles.toggleText, styles.toggleTextActive]}>Regular Class</Text>
-          </View>
-          <View style={styles.toggleButton}>
-            <Text style={styles.toggleText}>Express Class</Text>
-          </View>
+          <TouchableOpacity
+            style={[styles.toggleButton, busType === 'Regular' && styles.toggleActive]}
+            onPress={() => setBusType('Regular')}
+          >
+            <Text style={[styles.toggleText, busType === 'Regular' && styles.toggleTextActive]}>Regular Class</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.toggleButton, busType === 'Express' && styles.toggleActive]}
+            onPress={() => setBusType('Express')}
+          >
+            <Text style={[styles.toggleText, busType === 'Express' && styles.toggleTextActive]}>Express Class</Text>
+          </TouchableOpacity>
         </View>
 
         {/* 3. Date Picker Chip (Static) */}
@@ -88,23 +135,29 @@ export default function SeatSelectionScreen() {
           </View>
           
           <View style={styles.grid}>
-            {DUMMY_REGULAR_SEATS.map((seat) => {
-              // Menambahkan gap di tengah (aisle) dengan style margin
+            {seats.map((seat) => {
               const isAisleLeft = seat.col === 2;
-              
+              const isSelected = selectedSeatIds.includes(seat.id);
+              const bg = seat.status === 'booked' ? COLORS.seatBooked : isSelected ? COLORS.seatSelected : COLORS.seatAvailable;
+              const textColor = isSelected ? COLORS.textOnDark : COLORS.textPrimary;
+
               return (
-                <View 
-                  key={seat.id} 
+                <TouchableOpacity
+                  key={seat.id}
+                  onPress={() => handleSeatPress(seat)}
+                  disabled={seat.status === 'booked'}
                   style={[
-                    styles.seat, 
-                    isAisleLeft && { marginRight: SPACING.xl } // Jarak koridor
+                    styles.seat,
+                    { backgroundColor: bg },
+                    isAisleLeft && { marginRight: SPACING.xl },
+                    seat.status === 'booked' && { opacity: 0.8 },
                   ]}
                 >
-                  <Text style={styles.seatLabel}>{seat.label}</Text>
-                  <Text style={styles.seatPrice}>
+                  <Text style={[styles.seatLabel, { color: textColor }]}>{seat.label}</Text>
+                  <Text style={[styles.seatPrice, { color: textColor }]}>
                     {seat.price / 1000}k
                   </Text>
-                </View>
+                </TouchableOpacity>
               );
             })}
           </View>
@@ -114,13 +167,16 @@ export default function SeatSelectionScreen() {
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* 6. Sticky Bottom Bar (Static) */}
+      {/* 6. Sticky Bottom Bar */}
       <View style={styles.bottomBar}>
         <View style={styles.summaryContainer}>
-          <Text style={styles.summaryLabel}>0 Seats Selected</Text>
-          <Text style={styles.summaryPrice}>Rp 0</Text>
+          <Text style={styles.summaryLabel}>{selectedSeatIds.length} Seats Selected</Text>
+          <Text style={styles.summaryPrice}>Rp {totalPrice.toLocaleString('id-ID')}</Text>
         </View>
-        <TouchableOpacity style={[styles.confirmButton, styles.confirmButtonDisabled]} disabled>
+        <TouchableOpacity
+          style={[styles.confirmButton, selectedSeatIds.length === 0 && styles.confirmButtonDisabled]}
+          disabled={selectedSeatIds.length === 0}
+        >
           <Text style={styles.confirmButtonText}>Confirm Booking</Text>
         </TouchableOpacity>
       </View>
