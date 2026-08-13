@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────
-//  TrekBus – Sales History Screen
-// ─────────────────────────────────────────────
-
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal } from 'react-native';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_FAMILY } from '../constants/busConfig';
@@ -9,11 +5,13 @@ import { getAllBookings } from '../storage/bookingStorage';
 import { Booking } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 
+// Layar SalesHistoryScreen untuk menampilkan riwayat pemesanan tiket bus
 export default function SalesHistoryScreen() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filterDate, setFilterDate] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
+  // Untuk memuat semua data pemesanan dari AsyncStorage saat layar SalesHistory dibuka
   useEffect(() => {
     let mounted = true;
     async function load() {
@@ -27,6 +25,7 @@ export default function SalesHistoryScreen() {
     };
   }, []);
 
+  // Menghitung total pendapatan dari pemesanan yang terlihat (sesuai filter tanggal)
   const visibleBookings = useMemo(() => {
     if (!filterDate) return bookings;
     return bookings.filter((b) => b.departureDate === filterDate);
@@ -34,10 +33,12 @@ export default function SalesHistoryScreen() {
 
   const totalRevenue = useMemo(() => visibleBookings.reduce((s, b) => s + (b.totalPrice || 0), 0), [visibleBookings]);
 
+  // Format angka menjadi format mata uang Rupiah
   function formatCurrency(v: number) {
     return `Rp ${v.toLocaleString('id-ID')}`;
   }
 
+  // Mendapatkan daftar tanggal berikutnya (default 30 hari) untuk filter
   function getNextDates(days = 30) {
     const list: { iso: string; label: string }[] = [];
     const today = new Date();
@@ -68,6 +69,7 @@ export default function SalesHistoryScreen() {
         <Text style={styles.summaryValue}>{formatCurrency(totalRevenue)}</Text>
       </View>
 
+      {/* Booking List */}
       <FlatList
         data={visibleBookings}
         keyExtractor={(item) => item.id}
@@ -97,6 +99,7 @@ export default function SalesHistoryScreen() {
         )}
       />
 
+        {/* Date Filter Modal */}
       <Modal visible={isModalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, styles.cardShadow]}>
@@ -128,6 +131,7 @@ export default function SalesHistoryScreen() {
   );
 }
 
+// style untuk layar SalesHistoryScreen, termasuk header, card, dan modal
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: SPACING.md },

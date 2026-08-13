@@ -16,13 +16,19 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.krisnanda.BusSeatBooking"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "@react-native-community/datetimepicker"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "116f3912-28c1-4309-8029-5976c635ec21"
+      }
+    }
   }
 }

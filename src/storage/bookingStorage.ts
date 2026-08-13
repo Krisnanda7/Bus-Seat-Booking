@@ -1,21 +1,13 @@
-// ─────────────────────────────────────────────
-//  TrekBus – Booking Storage Layer
-//  AsyncStorage wrapper untuk menyimpan data
-//  booking dan status kursi secara lokal.
-// ─────────────────────────────────────────────
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Booking, BusType, BookedSeatsMap } from '../types';
 import { BUS_LAYOUT, getBookedSeatsKey } from '../constants/busConfig';
 
-// ── Storage Keys ────────────────────────────────
+// Key untuk menyimpan semua riwayat booking di AsyncStorage
 const BOOKINGS_KEY = 'trekbus_bookings';
 
-// ── Booking CRUD ────────────────────────────────
 
-/**
- * Mengambil semua riwayat booking yang tersimpan.
- */
+
+// Mengambil semua booking yang tersimpan di AsyncStorage
 export async function getAllBookings(): Promise<Booking[]> {
   try {
     const raw = await AsyncStorage.getItem(BOOKINGS_KEY);
@@ -27,10 +19,7 @@ export async function getAllBookings(): Promise<Booking[]> {
   }
 }
 
-/**
- * Menyimpan satu booking baru ke storage.
- * Booking baru ditambahkan ke awal array (terbaru di atas).
- */
+// Menyimpan booking baru ke AsyncStorage
 export async function saveBooking(booking: Booking): Promise<void> {
   try {
     const existing = await getAllBookings();
@@ -42,9 +31,7 @@ export async function saveBooking(booking: Booking): Promise<void> {
   }
 }
 
-/**
- * Menghapus semua booking (untuk keperluan reset/testing).
- */
+// Menghapus semua booking dari AsyncStorage (untuk keperluan testing atau reset)
 export async function clearAllBookings(): Promise<void> {
   try {
     await AsyncStorage.removeItem(BOOKINGS_KEY);
@@ -53,12 +40,7 @@ export async function clearAllBookings(): Promise<void> {
   }
 }
 
-// ── Booked Seats State ──────────────────────────
-
-/**
- * Mengambil daftar seatId yang sudah di-book
- * untuk tipe bus dan tanggal tertentu.
- */
+// Mengambil daftar seatId yang sudah di-book untuk tipe bus dan tanggal tertentu
 export async function getBookedSeats(
   busType: BusType,
   date: string
@@ -81,7 +63,7 @@ export async function getBookedSeats(
  * Business Rule: jika setelah penambahan SEMUA kursi sudah
  * di-book, maka ketersediaan kursi direset otomatis.
  *
- * @returns boolean — true jika terjadi auto-reset
+ * @returns boolean — true jika terjadi auto-reset (semua kursi sudah penuh), false jika tidak.
  */
 export async function markSeatsAsBooked(
   busType: BusType,
@@ -113,10 +95,7 @@ export async function markSeatsAsBooked(
   }
 }
 
-/**
- * Reset ketersediaan kursi untuk tipe bus dan tanggal tertentu.
- * (untuk keperluan manual reset atau testing)
- */
+// Menghapus seatId dari daftar kursi yang sudah di-book
 export async function resetSeatsForBusType(
   busType: BusType,
   date: string
@@ -129,12 +108,7 @@ export async function resetSeatsForBusType(
   }
 }
 
-// ── Booking Generator Helper ─────────────────────
-
-/**
- * Menghasilkan ID unik untuk booking baru
- * berformat: "booking-<timestamp>-<random>"
- */
+// Generate unique booking ID
 export function generateBookingId(): string {
   return `booking-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }

@@ -6,11 +6,12 @@ import { Seat, BusType, Booking, BookingItem } from '../types';
 import { getBookedSeats, saveBooking, markSeatsAsBooked, generateBookingId } from '../storage/bookingStorage';
 import { useNavigation } from '@react-navigation/native';
 
-// ── Dummy Data Generator ────────────────────────
+// Generate tempat duduk (seats) berdasarkan tipe bus, termasuk label, posisi, harga, dan status awal
 function generateSeats(busType: BusType): Seat[] {
   const layout = BUS_LAYOUT[busType];
   const seats: Seat[] = [];
   
+  // Loop melalui baris dan kolom untuk membuat objek Seat untuk setiap kursi
   for (let r = 0; r < layout.rows; r++) {
     for (let c = 1; c <= layout.cols; c++) {
       const label = getSeatLabel(r, c);
@@ -29,6 +30,7 @@ function generateSeats(busType: BusType): Seat[] {
   return seats;
 }
 
+// 
 const DUMMY_REGULAR_SEATS = generateSeats('Regular');
 
 export default function SeatSelectionScreen() {
@@ -42,20 +44,20 @@ export default function SeatSelectionScreen() {
   const navigation = useNavigation();
 
   useEffect(() => {
-    // regenerate seats when bus type changes and clear selection
+    // untuk mengatur ulang kursi saat tipe bus berubah
     setSeats(generateSeats(busType));
     setSelectedSeatIds([]);
   }, [busType]);
 
   useEffect(() => {
-    // when date changes, reset selected seats and reload seat availability
+    // untuk mengatur ulang kursi saat tanggal keberangkatan berubah
     setSelectedSeatIds([]);
     setSeats(generateSeats(busType));
   }, [departureDate, busType]);
 
-  // Load booked seats from storage for the selected bus type & date
+  // untuk memuat kursi yang sudah dibooking dari AsyncStorage saat tanggal keberangkatan dipilih
   useEffect(() => {
-    if (!departureDate) return; // nothing to load until a date selected
+    if (!departureDate) return; 
 
     const selectedDate = departureDate;
     let mounted = true;
@@ -144,12 +146,12 @@ export default function SeatSelectionScreen() {
       const autoReset = await markSeatsAsBooked(busType, departureDate as string, selectedSeatIds);
 
       if (autoReset) {
-        // storage reset happened — refresh seats
+        // riset kursi karena sudah penuh
         setSeats(generateSeats(busType));
         // Inform user that seats for this bus type/date were reset
         Alert.alert('Info', 'Semua kursi untuk tipe ini pada tanggal tersebut sudah penuh — ketersediaan dikembalikan. Booking tetap tersimpan di riwayat.');
       } else {
-        // mark these seats as booked locally
+        // update kursi yang sudah dibooking di state
         setSeats((prev) => prev.map((s) => (selectedSeatIds.includes(s.id) ? { ...s, status: 'booked' } : s)));
         Alert.alert('Sukses', 'Booking berhasil disimpan');
       }
@@ -163,7 +165,7 @@ export default function SeatSelectionScreen() {
     }
   }
 
-  // Date picker list generator (next 30 days)
+  // tanggal berikutnya untuk filter, default 30 hari
   function getNextDates(days = 30) {
     const list: { iso: string; label: string }[] = [];
     const today = new Date();
@@ -194,7 +196,7 @@ export default function SeatSelectionScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
 
-        {/* 1. App Header & Trip Info */}
+        {/* 1. App header dan info perjalanan */}
         <View style={styles.appHeaderRow}>
           <Text style={styles.appTitle}>TrekBus</Text>
           <TouchableOpacity onPress={() => (navigation as any).navigate('SalesHistory')}>
@@ -213,7 +215,7 @@ export default function SeatSelectionScreen() {
           </View>
         </View>
 
-        {/* 2. Bus Type Toggle */}
+        {/* 2. Tipe Bus */}
         <View style={[styles.toggleContainer, styles.cardShadow]}>
           <TouchableOpacity
             style={[styles.toggleButton, busType === 'Regular' && styles.toggleActive]}
@@ -229,7 +231,7 @@ export default function SeatSelectionScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* 3. Date Picker Chip (Static) */}
+        {/* 3. Tanggal Keberangkatan */}
         <TouchableOpacity style={[styles.dateChip, styles.cardShadow]} onPress={() => setIsDateModalVisible(true)}>
           <View style={styles.dateChipLeft}>
             <Ionicons name="calendar-outline" size={18} color={COLORS.primary} />
@@ -264,7 +266,7 @@ export default function SeatSelectionScreen() {
           </View>
         </Modal>
 
-        {/* 4. Seat Legend */}
+        {/* 4. Legend Kursi */}
         <View style={styles.legendContainer}>
           <View style={styles.legendItem}>
             <View style={[styles.legendSwatch, { backgroundColor: COLORS.seatAvailable, borderColor: COLORS.border, borderWidth: 1 }]} />
@@ -280,7 +282,7 @@ export default function SeatSelectionScreen() {
           </View>
         </View>
 
-        {/* 5. Seat Grid (Regular Class) */}
+        {/* 5. Grid Kursi */}
         <View style={[styles.busContainer, styles.cardShadow, !departureDate && styles.lockedBusContainer]}>
           <View style={styles.grid}>
             {seats.map((seat) => {
@@ -316,11 +318,11 @@ export default function SeatSelectionScreen() {
             )}
         </View>
         
-        {/* Spacer for bottom bar */}
+        {/* untuk jarak antara grid kursi dan bottom bar */}
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* 6. Sticky Bottom Bar */}
+      {/* 6. Bottom Bar */}
       <View style={styles.bottomBar}>
         <View style={styles.summaryContainer}>
           <Text style={styles.summaryLabel}>{selectedSeatIds.length} Seats Selected</Text>

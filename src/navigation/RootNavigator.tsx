@@ -1,10 +1,3 @@
-// ─────────────────────────────────────────────
-//  TrekBus – Root Navigator
-//  Stack Navigator dengan 2 route utama:
-//  - SeatSelection (layar utama)
-//  - SalesHistory  (riwayat pemesanan)
-// ─────────────────────────────────────────────
-
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -13,7 +6,7 @@ import SeatSelectionScreen from '../screens/SeatSelectionScreen';
 import SalesHistoryScreen from '../screens/SalesHistoryScreen';
 import { COLORS, FONT_FAMILY } from '../constants/busConfig';
 
-// ── Route Params Type ───────────────────────────
+// Root stack navigator parameter list
 export type RootStackParamList = {
   SeatSelection: undefined;
   SalesHistory: undefined;
@@ -21,7 +14,7 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-// ── Shared Header Options ───────────────────────
+// Shared screen options untuk semua layar di RootNavigator, termasuk header dan background
 const sharedScreenOptions = {
   headerStyle: {
     backgroundColor: COLORS.primary,
@@ -38,7 +31,7 @@ const sharedScreenOptions = {
   },
 };
 
-// ── Navigator ───────────────────────────────────
+// Root navigator component untuk mengatur navigasi antara layar SeatSelection dan SalesHistory
 export default function RootNavigator() {
   return (
     <NavigationContainer>

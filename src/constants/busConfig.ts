@@ -1,18 +1,12 @@
-// ─────────────────────────────────────────────
-//  TrekBus – Bus Configuration Constants
-//  Sesuai PRD: layout kursi, harga, aturan kolom
-// ─────────────────────────────────────────────
-
 import { BusType, SeatPosition } from '../types';
 
-// ── Kolom Layout ────────────────────────────────
+
 // Setiap tipe bus memiliki 4 kolom per baris.
 // Kolom 1 & 4 = window (dekat jendela)
 // Kolom 2 & 3 = aisle  (tengah / koridor)
 export const COLUMNS_PER_ROW = 4;
 export const WINDOW_COLUMNS = [1, 4] as const; // kolom 1 dan 4
 
-// ── Layout Grid ─────────────────────────────────
 // Regular Class : 5 baris × 4 kolom = 20 kursi
 // Express Class : 3 baris × 4 kolom = 12 kursi
 export const BUS_LAYOUT: Record<BusType, { rows: number; cols: number; totalSeats: number }> = {
@@ -20,7 +14,6 @@ export const BUS_LAYOUT: Record<BusType, { rows: number; cols: number; totalSeat
   Express: { rows: 3, cols: 4, totalSeats: 12 },
 };
 
-// ── Harga Kursi ─────────────────────────────────
 // Regular window  = Rp 150.000
 // Regular aisle   = Rp 100.000
 // Express window  = Rp 200.000
@@ -36,59 +29,40 @@ export const SEAT_PRICES: Record<BusType, Record<SeatPosition, number>> = {
   },
 };
 
-// ── Batasan Pemesanan ───────────────────────────
-/** Jumlah maksimum kursi yang bisa dipilih dalam satu transaksi */
+
+// Batas maksimal kursi yang bisa di-booking dalam satu transaksi
 export const MAX_SEATS_PER_BOOKING = 5;
 
-// ── Label Baris ─────────────────────────────────
-// Baris dilabeli A, B, C, D, E (Regular) atau A, B, C (Express)
+// Batas maksimal transaksi booking per hari per user
 export const ROW_LABELS = ['A', 'B', 'C', 'D', 'E'] as const;
 
-// ── Helpers ─────────────────────────────────────
-/**
- * Menentukan posisi kursi berdasarkan nomor kolom (1-based).
- * Kolom 1 dan 4 = window, kolom 2 dan 3 = aisle.
- */
+// Mendapatkan posisi kursi (window / aisle) berdasarkan nomor kolom
 export function getSeatPosition(col: number): SeatPosition {
   return WINDOW_COLUMNS.includes(col as 1 | 4) ? 'window' : 'aisle';
 }
 
-/**
- * Mendapatkan harga kursi berdasarkan tipe bus dan kolom.
- */
+// Mendapatkan harga kursi berdasarkan tipe bus dan nomor kolom
 export function getSeatPrice(busType: BusType, col: number): number {
   const position = getSeatPosition(col);
   return SEAT_PRICES[busType][position];
 }
 
-/**
- * Menghasilkan label kursi, mis. "A1", "B3", "C4".
- * rowIndex: 0-based index baris
- * col: 1-based kolom
- */
+// Mendapatkan label kursi berdasarkan nomor baris dan kolom
 export function getSeatLabel(rowIndex: number, col: number): string {
   return `${ROW_LABELS[rowIndex]}${col}`;
 }
 
-/**
- * Menghasilkan seat ID unik berdasarkan tipe bus dan label.
- * Contoh: "Regular-A1", "Express-C4"
- */
+// Mendapatkan seatId unik berdasarkan busType dan label kursi
 export function getSeatId(busType: BusType, label: string): string {
   return `${busType}-${label}`;
 }
 
-/**
- * Storage key untuk booked seats per tipe bus per tanggal.
- * Contoh: "bookedSeats-Regular-2026-08-15"
- */
+// Mendapatkan key untuk menyimpan data kursi yang sudah di-booking di AsyncStorage
 export function getBookedSeatsKey(busType: BusType, date: string): string {
-  // Storage key per busType + date, normalized to lowercase
-  // e.g. booked_seats_regular_2026-08-15
   return `booked_seats_${busType.toLowerCase()}_${date}`;
 }
 
-// ── Design Tokens (dari DESIGN.md) ──────────────
+// Desain untuk menampilkan kursi di UI, berdasarkan tipe bus dan tanggal keberangkatan
 export const COLORS = {
   primary:   '#14213D', // Grounded Navy
   secondary: '#E94560', // Coral Red
@@ -115,7 +89,7 @@ export const FONT_FAMILY = 'System';
 
 export const BORDER_RADIUS = {
   sm:   4,
-  base: 8,  // Round 8 – standar TrekBus
+  base: 8, 
   md:   12,
   lg:   16,
   xl:   24,
