@@ -455,11 +455,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    width: 240, // Lebar fixed untuk 4 kolom + aisle gap
+    width: '100%',
+    maxWidth: 360, // responsive cap for larger screens
   },
   seat: {
-    width: 48,
-    height: 48,
+    flexBasis: '22%',
+    maxWidth: 64,
+    minWidth: 48,
+    aspectRatio: 1,
     backgroundColor: COLORS.seatAvailable,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -472,6 +475,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: COLORS.textPrimary,
+    fontFamily: FONT_FAMILY,
   },
   seatPrice: {
     fontSize: 10,
@@ -518,6 +522,11 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
     borderRadius: BORDER_RADIUS.base,
     marginLeft: SPACING.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
   },
   confirmButtonDisabled: {
     backgroundColor: COLORS.neutral,
@@ -595,5 +604,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textSecondary,
     textAlign: 'center',
+  },
+  // subtle card shadow to match design
+  cardShadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
   },
 });

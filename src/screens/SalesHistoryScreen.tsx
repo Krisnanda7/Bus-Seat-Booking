@@ -4,7 +4,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal } from 'react-native';
-import { COLORS, SPACING, BORDER_RADIUS } from '../constants/busConfig';
+import { COLORS, SPACING, BORDER_RADIUS, FONT_FAMILY } from '../constants/busConfig';
 import { getAllBookings } from '../storage/bookingStorage';
 import { Booking } from '../types';
 import { Ionicons } from '@expo/vector-icons';
@@ -73,10 +73,11 @@ export default function SalesHistoryScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: SPACING.md }}
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <View style={[styles.card, styles.cardShadow]}>
             <View style={styles.cardHeader}>
-              <View style={[styles.badge, { backgroundColor: item.busType === 'Regular' ? COLORS.primary : COLORS.tertiary }]}>
-                <Text style={styles.badgeText}>{item.items.map((it) => it.seatLabel).join(', ')}</Text>
+              <View style={[styles.badge, { backgroundColor: item.busType === 'Regular' ? COLORS.primary : COLORS.tertiary }]}> 
+                {/** Show concise badge: first seat + count */}
+                <Text style={styles.badgeText}>{item.items.length > 1 ? `${item.items[0].seatLabel}+${item.items.length - 1}` : item.items[0].seatLabel}</Text>
               </View>
               <View style={styles.meta}>
                 <Text style={styles.routeText}>Jakarta - Bandung</Text>
@@ -130,20 +131,23 @@ export default function SalesHistoryScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: SPACING.md },
-  title: { fontSize: 18, fontWeight: '800', color: COLORS.primary },
+  title: { fontSize: 18, fontWeight: '800', color: COLORS.primary, fontFamily: FONT_FAMILY },
   headerIcon: { padding: SPACING.xs },
-  summaryCard: { backgroundColor: COLORS.surface, marginHorizontal: SPACING.md, padding: SPACING.md, borderRadius: BORDER_RADIUS.base, borderWidth: 1, borderColor: COLORS.border },
-  summaryLabel: { fontSize: 12, color: COLORS.textSecondary },
-  summaryValue: { fontSize: 20, fontWeight: '800', color: COLORS.textPrimary, marginTop: SPACING.sm },
+  summaryCard: { backgroundColor: COLORS.surface, marginHorizontal: SPACING.md, padding: SPACING.md, borderRadius: BORDER_RADIUS.base, borderWidth: 1, borderColor: COLORS.border, ...{
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2
+  } },
+  summaryLabel: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONT_FAMILY },
+  summaryValue: { fontSize: 20, fontWeight: '800', color: COLORS.textPrimary, marginTop: SPACING.sm, fontFamily: FONT_FAMILY },
   card: { backgroundColor: COLORS.surface, borderRadius: BORDER_RADIUS.base, padding: SPACING.md, marginTop: SPACING.md, borderWidth: 1, borderColor: COLORS.border },
+  cardShadow: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2 },
   cardHeader: { flexDirection: 'row', alignItems: 'center' },
   badge: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', marginRight: SPACING.md },
-  badgeText: { color: COLORS.textOnDark, fontWeight: '700', fontSize: 12, textAlign: 'center' },
+  badgeText: { color: COLORS.textOnDark, fontWeight: '700', fontSize: 12, textAlign: 'center', fontFamily: FONT_FAMILY },
   meta: { flex: 1 },
-  routeText: { fontWeight: '700', color: COLORS.textPrimary },
-  dateText: { fontSize: 12, color: COLORS.textSecondary, marginTop: 4 },
+  routeText: { fontWeight: '700', color: COLORS.textPrimary, fontFamily: FONT_FAMILY },
+  dateText: { fontSize: 12, color: COLORS.textSecondary, marginTop: 4, fontFamily: FONT_FAMILY },
   tagContainer: { marginLeft: SPACING.sm },
-  tag: { backgroundColor: COLORS.tertiary, color: COLORS.textOnDark, paddingHorizontal: SPACING.sm, paddingVertical: SPACING.xs, borderRadius: BORDER_RADIUS.sm, color: COLORS.textOnDark, fontWeight: '700' },
+  tag: { backgroundColor: COLORS.tertiary, color: COLORS.textOnDark, paddingHorizontal: SPACING.sm, paddingVertical: SPACING.xs, borderRadius: BORDER_RADIUS.sm, fontWeight: '700', color: COLORS.textOnDark, fontFamily: FONT_FAMILY },
   cardFooter: { marginTop: SPACING.md, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   priceText: { fontWeight: '800', color: COLORS.primary },
   empty: { padding: SPACING.md, alignItems: 'center' },
