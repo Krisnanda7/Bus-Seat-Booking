@@ -63,7 +63,7 @@ export default function SalesHistoryScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.summaryCard}>
+      <View style={[styles.summaryCard, styles.cardShadow]}>
         <Text style={styles.summaryLabel}>Total Revenue</Text>
         <Text style={styles.summaryValue}>{formatCurrency(totalRevenue)}</Text>
       </View>
@@ -99,14 +99,14 @@ export default function SalesHistoryScreen() {
 
       <Modal visible={isModalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, styles.cardShadow]}>
             <Text style={styles.modalTitle}>Filter by Departure Date</Text>
             <FlatList
               data={getNextDates(30)}
               keyExtractor={(i) => i.iso}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={styles.dateItem}
+                  style={[styles.dateItem, filterDate === item.iso && styles.dateItemSelected]}
                   onPress={() => {
                     setFilterDate(item.iso);
                     setIsModalVisible(false);
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   routeText: { fontWeight: '700', color: COLORS.textPrimary, fontFamily: FONT_FAMILY },
   dateText: { fontSize: 12, color: COLORS.textSecondary, marginTop: 4, fontFamily: FONT_FAMILY },
   tagContainer: { marginLeft: SPACING.sm },
-  tag: { backgroundColor: COLORS.tertiary, color: COLORS.textOnDark, paddingHorizontal: SPACING.sm, paddingVertical: SPACING.xs, borderRadius: BORDER_RADIUS.sm, fontWeight: '700', color: COLORS.textOnDark, fontFamily: FONT_FAMILY },
+  tag: { backgroundColor: COLORS.tertiary, color: COLORS.textOnDark, paddingHorizontal: SPACING.sm, paddingVertical: SPACING.xs, borderRadius: BORDER_RADIUS.sm, fontWeight: '700', fontFamily: FONT_FAMILY },
   cardFooter: { marginTop: SPACING.md, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   priceText: { fontWeight: '800', color: COLORS.primary },
   empty: { padding: SPACING.md, alignItems: 'center' },
@@ -156,6 +156,11 @@ const styles = StyleSheet.create({
   modalContent: { backgroundColor: COLORS.surface, maxHeight: '60%', borderTopLeftRadius: BORDER_RADIUS.lg, borderTopRightRadius: BORDER_RADIUS.lg, padding: SPACING.md },
   modalTitle: { fontSize: 16, fontWeight: '700', marginBottom: SPACING.sm, color: COLORS.textPrimary },
   dateItem: { paddingVertical: SPACING.sm, borderBottomWidth: 1, borderBottomColor: COLORS.border },
+  dateItemSelected: {
+    backgroundColor: '#F5F7FF',
+    borderRadius: BORDER_RADIUS.base,
+    paddingHorizontal: SPACING.sm,
+  },
   dateItemText: { fontSize: 14, color: COLORS.textPrimary },
   modalActions: { marginTop: SPACING.md, alignItems: 'center' },
   clearText: { color: COLORS.secondary, fontWeight: '700' },

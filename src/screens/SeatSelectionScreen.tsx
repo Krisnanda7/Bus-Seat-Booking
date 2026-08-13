@@ -57,10 +57,11 @@ export default function SeatSelectionScreen() {
   useEffect(() => {
     if (!departureDate) return; // nothing to load until a date selected
 
+    const selectedDate = departureDate;
     let mounted = true;
     async function loadBooked() {
       try {
-        const booked = await getBookedSeats(busType, departureDate);
+        const booked = await getBookedSeats(busType, selectedDate);
         if (!mounted) return;
         setSeats((prev) => prev.map((s) => ({ ...s, status: booked.includes(s.id) ? 'booked' : 'available' })));
       } catch (error) {
@@ -111,22 +112,28 @@ export default function SeatSelectionScreen() {
 
   async function confirmBooking() {
     if (selectedSeatIds.length === 0) return;
+    if (!departureDate) {
+      Alert.alert('Pilih tanggal', 'Pilih tanggal keberangkatan terlebih dahulu');
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
+      const selectedDate = departureDate;
       const items: BookingItem[] = selectedSeats.map((s) => ({
         seatId: s.id,
         seatLabel: s.label,
         busType: s.busType,
         position: s.position,
         price: s.price,
-        departureDate,
+        departureDate: selectedDate,
       }));
 
       const booking: Booking = {
         id: generateBookingId(),
         busType,
-        departureDate,
+        departureDate: selectedDate,
         items,
         totalPrice: totalPrice,
         createdAt: new Date().toISOString(),
@@ -179,6 +186,10 @@ export default function SeatSelectionScreen() {
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
+  const routeDisplay = departureDate
+    ? `Denpasar - Gilimanuk • ${formattedDepartureLabel()}`
+    : 'Denpasar - Gilimanuk • Select Date';
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -191,17 +202,19 @@ export default function SeatSelectionScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.headerCard}>
+        <View style={[styles.headerCard, styles.cardShadow]}>
           <View style={styles.routeContainer}>
-            <Ionicons name="bus" size={24} color={COLORS.primary} />
+            <View style={styles.routeIconWrap}>
+              <Ionicons name="bus" size={24} color={COLORS.primary} />
+            </View>
             <View style={styles.routeTextContainer}>
-              <Text style={styles.routeText}>Jakarta - Bandung • 24 Oct 2023</Text>
+              <Text style={styles.routeText}>{routeDisplay}</Text>
             </View>
           </View>
         </View>
 
         {/* 2. Bus Type Toggle */}
-        <View style={styles.toggleContainer}>
+        <View style={[styles.toggleContainer, styles.cardShadow]}>
           <TouchableOpacity
             style={[styles.toggleButton, busType === 'Regular' && styles.toggleActive]}
             onPress={() => setBusType('Regular')}
@@ -217,7 +230,7 @@ export default function SeatSelectionScreen() {
         </View>
 
         {/* 3. Date Picker Chip (Static) */}
-        <TouchableOpacity style={styles.dateChip} onPress={() => setIsDateModalVisible(true)}>
+        <TouchableOpacity style={[styles.dateChip, styles.cardShadow]} onPress={() => setIsDateModalVisible(true)}>
           <Ionicons name="calendar-outline" size={20} color={COLORS.primary} />
           <Text style={styles.dateChipText}>{formattedDepartureLabel()}</Text>
           <Ionicons name="chevron-down" size={20} color={COLORS.neutral} />
@@ -225,14 +238,14 @@ export default function SeatSelectionScreen() {
 
         <Modal visible={isDateModalVisible} animationType="slide" transparent>
           <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
+            <View style={[styles.modalContent, styles.cardShadow]}>
               <Text style={styles.modalTitle}>Select Departure Date</Text>
               <FlatList
                 data={getNextDates(30)}
                 keyExtractor={(item) => item.iso}
                 renderItem={({ item }) => (
                   <TouchableOpacity
-                    style={styles.dateItem}
+                    style={[styles.dateItem, departureDate === item.iso && styles.dateItemSelected]}
                     onPress={() => {
                       setDepartureDate(item.iso);
                       setIsDateModalVisible(false);
@@ -266,7 +279,7 @@ export default function SeatSelectionScreen() {
         </View>
 
         {/* 5. Seat Grid (Regular Class) */}
-        <View style={[styles.busContainer, !departureDate && styles.lockedBusContainer]}>
+        <View style={[styles.busContainer, styles.cardShadow, !departureDate && styles.lockedBusContainer]}>
           <View style={styles.driverSection}>
             <Ionicons name="car-sport-outline" size={28} color={COLORS.neutral} />
           </View>
@@ -340,7 +353,7 @@ const styles = StyleSheet.create({
   headerCard: {
     backgroundColor: COLORS.surface,
     padding: SPACING.md,
-    borderRadius: BORDER_RADIUS.base,
+    borderRadius: BORDER_RADIUS.lg,
     borderWidth: 1,
     borderColor: COLORS.border,
     marginBottom: SPACING.md,
@@ -349,13 +362,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  routeIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#EEF3FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   routeTextContainer: {
     marginLeft: SPACING.md,
+    flex: 1,
   },
   routeText: {
     fontSize: 16,
     fontWeight: '700',
     color: COLORS.textPrimary,
+    fontFamily: FONT_FAMILY,
   },
   dateText: {
     fontSize: 14,
@@ -372,6 +395,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     marginBottom: SPACING.md,
+    overflow: 'hidden',
   },
   toggleButton: {
     flex: 1,
@@ -381,11 +405,17 @@ const styles = StyleSheet.create({
   },
   toggleActive: {
     backgroundColor: COLORS.primary,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 2,
   },
   toggleText: {
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.textSecondary,
+    fontFamily: FONT_FAMILY,
   },
   toggleTextActive: {
     color: COLORS.textOnDark,
@@ -396,11 +426,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.surface,
-    padding: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
     borderRadius: BORDER_RADIUS.base,
     borderWidth: 1,
     borderColor: COLORS.border,
     marginBottom: SPACING.lg,
+    minHeight: 48,
   },
   dateChipText: {
     flex: 1,
@@ -408,6 +440,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.textPrimary,
+    fontFamily: FONT_FAMILY,
   },
 
   // Legend
@@ -541,6 +574,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingTop: SPACING.sm,
     paddingBottom: SPACING.xs,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   appTitle: {
     fontSize: 20,
@@ -550,6 +586,14 @@ const styles = StyleSheet.create({
   },
   headerIcon: {
     padding: SPACING.xs,
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.base,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   modalOverlay: {
     flex: 1,
@@ -559,8 +603,8 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: COLORS.surface,
     maxHeight: '60%',
-    borderTopLeftRadius: BORDER_RADIUS.lg,
-    borderTopRightRadius: BORDER_RADIUS.lg,
+    borderTopLeftRadius: BORDER_RADIUS.xl,
+    borderTopRightRadius: BORDER_RADIUS.xl,
     padding: SPACING.md,
   },
   modalTitle: {
@@ -568,15 +612,22 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: SPACING.sm,
     color: COLORS.textPrimary,
+    fontFamily: FONT_FAMILY,
   },
   dateItem: {
     paddingVertical: SPACING.sm,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
+  dateItemSelected: {
+    backgroundColor: '#F5F7FF',
+    borderRadius: BORDER_RADIUS.base,
+    paddingHorizontal: SPACING.sm,
+  },
   dateItemText: {
     fontSize: 14,
     color: COLORS.textPrimary,
+    fontFamily: FONT_FAMILY,
   },
   modalClose: {
     marginTop: SPACING.md,
@@ -604,6 +655,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textSecondary,
     textAlign: 'center',
+    fontFamily: FONT_FAMILY,
+    fontWeight: '600',
   },
   // subtle card shadow to match design
   cardShadow: {
