@@ -111,7 +111,7 @@ export const COLORS = {
   textOnDark:    '#FFFFFF',
 } as const;
 
-export const FONT_FAMILY = 'Manrope';
+export const FONT_FAMILY = 'System';
 
 export const BORDER_RADIUS = {
   sm:   4,

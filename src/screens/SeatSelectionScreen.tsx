@@ -197,15 +197,15 @@ export default function SeatSelectionScreen() {
         {/* 1. App Header & Trip Info */}
         <View style={styles.appHeaderRow}>
           <Text style={styles.appTitle}>TrekBus</Text>
-          <TouchableOpacity onPress={() => (navigation as any).navigate('SalesHistory')} style={styles.headerIcon}>
-            <Ionicons name="receipt-outline" size={22} color={COLORS.primary} />
+          <TouchableOpacity onPress={() => (navigation as any).navigate('SalesHistory')}>
+            <Text style={styles.headerLink}>History</Text>
           </TouchableOpacity>
         </View>
 
         <View style={[styles.headerCard, styles.cardShadow]}>
           <View style={styles.routeContainer}>
             <View style={styles.routeIconWrap}>
-              <Ionicons name="bus" size={24} color={COLORS.primary} />
+              <Ionicons name="bus" size={22} color={COLORS.primary} />
             </View>
             <View style={styles.routeTextContainer}>
               <Text style={styles.routeText}>{routeDisplay}</Text>
@@ -231,9 +231,11 @@ export default function SeatSelectionScreen() {
 
         {/* 3. Date Picker Chip (Static) */}
         <TouchableOpacity style={[styles.dateChip, styles.cardShadow]} onPress={() => setIsDateModalVisible(true)}>
-          <Ionicons name="calendar-outline" size={20} color={COLORS.primary} />
-          <Text style={styles.dateChipText}>{formattedDepartureLabel()}</Text>
-          <Ionicons name="chevron-down" size={20} color={COLORS.neutral} />
+          <View style={styles.dateChipLeft}>
+            <Ionicons name="calendar-outline" size={18} color={COLORS.primary} />
+            <Text style={styles.dateChipText}>{formattedDepartureLabel()}</Text>
+          </View>
+          <Ionicons name="chevron-down" size={18} color={COLORS.neutral} />
         </TouchableOpacity>
 
         <Modal visible={isDateModalVisible} animationType="slide" transparent>
@@ -280,10 +282,6 @@ export default function SeatSelectionScreen() {
 
         {/* 5. Seat Grid (Regular Class) */}
         <View style={[styles.busContainer, styles.cardShadow, !departureDate && styles.lockedBusContainer]}>
-          <View style={styles.driverSection}>
-            <Ionicons name="car-sport-outline" size={28} color={COLORS.neutral} />
-          </View>
-          
           <View style={styles.grid}>
             {seats.map((seat) => {
               const isAisleLeft = seat.col === 2;
@@ -352,33 +350,41 @@ const styles = StyleSheet.create({
   // Header
   headerCard: {
     backgroundColor: COLORS.surface,
-    padding: SPACING.md,
+    paddingVertical: 18,
+    paddingHorizontal: SPACING.md,
     borderRadius: BORDER_RADIUS.lg,
     borderWidth: 1,
     borderColor: COLORS.border,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.lg,
+    minHeight: 72,
+    justifyContent: 'center',
   },
   routeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   routeIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: '#EEF3FF',
     alignItems: 'center',
     justifyContent: 'center',
+    marginRight: SPACING.sm,
   },
   routeTextContainer: {
-    marginLeft: SPACING.md,
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   routeText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
     color: COLORS.textPrimary,
     fontFamily: FONT_FAMILY,
+    letterSpacing: 0.1,
+    textAlign: 'center',
   },
   dateText: {
     fontSize: 14,
@@ -425,6 +431,7 @@ const styles = StyleSheet.create({
   dateChip: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: COLORS.surface,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
@@ -434,13 +441,18 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
     minHeight: 48,
   },
-  dateChipText: {
+  dateChipLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
     flex: 1,
+  },
+  dateChipText: {
     marginLeft: SPACING.sm,
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.textPrimary,
     fontFamily: FONT_FAMILY,
+    letterSpacing: 0.1,
   },
 
   // Legend
@@ -474,46 +486,39 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     alignItems: 'center',
-  },
-  driverSection: {
-    width: '100%',
-    alignItems: 'flex-end',
-    paddingRight: SPACING.md,
-    marginBottom: SPACING.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-    paddingBottom: SPACING.md,
+    minHeight: 340,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
     width: '100%',
-    maxWidth: 360, // responsive cap for larger screens
+    maxWidth: 320,
   },
   seat: {
-    flexBasis: '22%',
-    maxWidth: 64,
-    minWidth: 48,
-    aspectRatio: 1,
+    width: 56,
+    height: 56,
     backgroundColor: COLORS.seatAvailable,
     borderWidth: 1,
     borderColor: COLORS.border,
     borderRadius: BORDER_RADIUS.base,
     alignItems: 'center',
     justifyContent: 'center',
-    margin: SPACING.xs,
+    margin: 6,
   },
   seatLabel: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '700',
     color: COLORS.textPrimary,
     fontFamily: FONT_FAMILY,
+    letterSpacing: 0.2,
   },
   seatPrice: {
-    fontSize: 10,
+    fontSize: 9,
     color: COLORS.textSecondary,
     marginTop: 2,
+    fontFamily: FONT_FAMILY,
+    letterSpacing: 0.1,
   },
 
   // Bottom Bar
@@ -529,11 +534,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    // Shadow for iOS/Android
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
     elevation: 20,
   },
   summaryContainer: {
@@ -543,32 +547,37 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.textSecondary,
     marginBottom: 4,
+    fontFamily: FONT_FAMILY,
+    letterSpacing: 0.12,
   },
   summaryPrice: {
     fontSize: 18,
     fontWeight: '800',
     color: COLORS.textPrimary,
+    fontFamily: FONT_FAMILY,
   },
   confirmButton: {
-    backgroundColor: COLORS.secondary,
+    backgroundColor: COLORS.primary,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     borderRadius: BORDER_RADIUS.base,
     marginLeft: SPACING.md,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.16,
+    shadowRadius: 10,
+    elevation: 6,
   },
   confirmButtonDisabled: {
-    backgroundColor: COLORS.neutral,
-    opacity: 0.5,
+    backgroundColor: '#B8C0C8',
+    opacity: 0.8,
   },
   confirmButtonText: {
     color: COLORS.textOnDark,
     fontWeight: '700',
-    fontSize: 16,
+    fontSize: 15,
+    fontFamily: FONT_FAMILY,
+    letterSpacing: 0.12,
   },
   appHeaderRow: {
     paddingHorizontal: SPACING.md,
@@ -583,17 +592,14 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: COLORS.primary,
     fontFamily: FONT_FAMILY,
+    letterSpacing: 0.2,
   },
-  headerIcon: {
-    padding: SPACING.xs,
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.base,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
+  headerLink: {
+    color: COLORS.primary,
+    fontWeight: '700',
+    fontSize: 13,
+    fontFamily: FONT_FAMILY,
+    letterSpacing: 0.12,
   },
   modalOverlay: {
     flex: 1,
