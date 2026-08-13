@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS, BUS_LAYOUT, getSeatLabel, getSeatPrice, getSeatId, getSeatPosition, MAX_SEATS_PER_BOOKING, FONT_FAMILY } from '../constants/busConfig';
-import { Seat, BusType } from '../types';
+import { Seat, BusType, Booking, BookingItem } from '../types';
+import { getBookedSeats, saveBooking, markSeatsAsBooked, generateBookingId } from '../storage/bookingStorage';
 
 // ── Dummy Data Generator ────────────────────────
 function generateSeats(busType: BusType): Seat[] {
@@ -33,12 +34,34 @@ export default function SeatSelectionScreen() {
   const [busType, setBusType] = useState<BusType>('Regular');
   const [seats, setSeats] = useState<Seat[]>(() => generateSeats('Regular'));
   const [selectedSeatIds, setSelectedSeatIds] = useState<string[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Temporary fixed departure date (matching header)
+  const departureDate = '2023-10-24';
 
   useEffect(() => {
     // regenerate seats when bus type changes and clear selection
     setSeats(generateSeats(busType));
     setSelectedSeatIds([]);
   }, [busType]);
+
+  // Load booked seats from storage for the selected bus type & date
+  useEffect(() => {
+    let mounted = true;
+    async function loadBooked() {
+      try {
+        const booked = await getBookedSeats(busType, departureDate);
+        if (!mounted) return;
+        setSeats((prev) => prev.map((s) => ({ ...s, status: booked.includes(s.id) ? 'booked' : 'available' })));
+      } catch (error) {
+        console.error('loadBooked error', error);
+      }
+    }
+    loadBooked();
+    return () => {
+      mounted = false;
+    };
+  }, [busType, departureDate]);
 
   const selectedSeats = useMemo(
     () => seats.filter((s) => selectedSeatIds.includes(s.id)),
@@ -69,6 +92,51 @@ export default function SeatSelectionScreen() {
 
     setSelectedSeatIds((prev) => [...prev, seat.id]);
     setSeats((prev) => prev.map((s) => (s.id === seat.id ? { ...s, status: 'selected' } : s)));
+  }
+
+  async function confirmBooking() {
+    if (selectedSeatIds.length === 0) return;
+    setIsProcessing(true);
+
+    try {
+      const items: BookingItem[] = selectedSeats.map((s) => ({
+        seatId: s.id,
+        seatLabel: s.label,
+        busType: s.busType,
+        position: s.position,
+        price: s.price,
+        departureDate,
+      }));
+
+      const booking: Booking = {
+        id: generateBookingId(),
+        busType,
+        departureDate,
+        items,
+        totalPrice: totalPrice,
+        createdAt: new Date().toISOString(),
+      };
+
+      await saveBooking(booking);
+
+      const autoReset = await markSeatsAsBooked(busType, departureDate, selectedSeatIds);
+
+      if (autoReset) {
+        // storage reset happened — refresh seats
+        setSeats(generateSeats(busType));
+      } else {
+        // mark these seats as booked locally
+        setSeats((prev) => prev.map((s) => (selectedSeatIds.includes(s.id) ? { ...s, status: 'booked' } : s)));
+      }
+
+      setSelectedSeatIds([]);
+      Alert.alert('Sukses', 'Booking berhasil disimpan');
+    } catch (error) {
+      console.error('confirmBooking error', error);
+      Alert.alert('Error', 'Gagal menyimpan booking');
+    } finally {
+      setIsProcessing(false);
+    }
   }
 
   return (
@@ -174,10 +242,11 @@ export default function SeatSelectionScreen() {
           <Text style={styles.summaryPrice}>Rp {totalPrice.toLocaleString('id-ID')}</Text>
         </View>
         <TouchableOpacity
-          style={[styles.confirmButton, selectedSeatIds.length === 0 && styles.confirmButtonDisabled]}
-          disabled={selectedSeatIds.length === 0}
+          style={[styles.confirmButton, (selectedSeatIds.length === 0 || isProcessing) && styles.confirmButtonDisabled]}
+          disabled={selectedSeatIds.length === 0 || isProcessing}
+          onPress={confirmBooking}
         >
-          <Text style={styles.confirmButtonText}>Confirm Booking</Text>
+          <Text style={styles.confirmButtonText}>{isProcessing ? 'Processing...' : 'Confirm Booking'}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
