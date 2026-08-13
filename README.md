@@ -1,14 +1,14 @@
 # Bus Seat Booking (TrekBus)
 
-IMPORTANT — Install / Download APK (top)
+LINK INSTALL APK
 - Google Drive (APK): https://drive.google.com/drive/folders/1xHONWZ8_DkybOM6LC2BZdjL7V3ocotF5?usp=sharing
 - GitHub repo: https://github.com/Krisnanda7
 
 ---
 
 
-Author: I Dewa Gede Mas Bagus Krisnanda
-Email: baguskrisna424@gmail.com
+AUTHOR: I DEWA GEDE MAS BAGUS KRISNANDA
+- Email: baguskrisna424@gmail.com
 
 Brief description
 -----------------
@@ -85,17 +85,4 @@ Project structure (brief)
 - `src/storage/bookingStorage.ts` – local storage helper
 - `src/constants/busConfig.ts` – layout, pricing, colors, design tokens
 
-How to contribute
------------------
-1. Fork the repository and create a new branch for your feature or fix.
-2. Open a pull request with a clear description of changes.
-
-License
--------
-This project is licensed under the MIT License (adjust if needed).
-
-Notes
------
-- Replace the Google Drive and GitHub links at the top of this README with the correct URLs for quick access.
-- I can help link an uploaded APK on Google Drive and update this README accordingly.
 
