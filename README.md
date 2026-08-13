@@ -1,4 +1,4 @@
-# Bus Seat Booking (TrekBus) 
+# <h1 align="center">Bus Seat Booking (TrekBus)</h1>
 
 LINK INSTALL APK
 - Google Drive (APK): https://drive.google.com/drive/folders/1xHONWZ8_DkybOM6LC2BZdjL7V3ocotF5?usp=sharing
