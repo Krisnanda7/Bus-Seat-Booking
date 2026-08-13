@@ -124,13 +124,15 @@ export default function SeatSelectionScreen() {
       if (autoReset) {
         // storage reset happened — refresh seats
         setSeats(generateSeats(busType));
+        // Inform user that seats for this bus type/date were reset
+        Alert.alert('Info', 'Semua kursi untuk tipe ini pada tanggal tersebut sudah penuh — ketersediaan dikembalikan. Booking tetap tersimpan di riwayat.');
       } else {
         // mark these seats as booked locally
         setSeats((prev) => prev.map((s) => (selectedSeatIds.includes(s.id) ? { ...s, status: 'booked' } : s)));
+        Alert.alert('Sukses', 'Booking berhasil disimpan');
       }
 
       setSelectedSeatIds([]);
-      Alert.alert('Sukses', 'Booking berhasil disimpan');
     } catch (error) {
       console.error('confirmBooking error', error);
       Alert.alert('Error', 'Gagal menyimpan booking');
