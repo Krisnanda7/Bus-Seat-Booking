@@ -2,13 +2,12 @@
 
 LINK INSTALL APK
 - Google Drive (APK): https://drive.google.com/drive/folders/1xHONWZ8_DkybOM6LC2BZdjL7V3ocotF5?usp=sharing
-- GitHub repo: https://github.com/Krisnanda7
-
 ---
 
+# AUTHOR: I DEWA GEDE MAS BAGUS KRISNANDA
 
-AUTHOR: I DEWA GEDE MAS BAGUS KRISNANDA
 - Email: baguskrisna424@gmail.com
+- GitHub repo: https://github.com/Krisnanda7
 
 Brief description
 -----------------
