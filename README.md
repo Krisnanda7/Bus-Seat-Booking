@@ -1,8 +1,8 @@
 # Bus Seat Booking (TrekBus)
 
 IMPORTANT — Install / Download APK (top)
-- Google Drive (APK): https://drive.google.com/REPLACE-WITH-YOUR-GDRIVE-LINK
-- GitHub repo: https://github.com/REPLACE-WITH-YOUR-GITHUB
+- Google Drive (APK): https://drive.google.com/drive/folders/1xHONWZ8_DkybOM6LC2BZdjL7V3ocotF5?usp=sharing
+- GitHub repo: https://github.com/Krisnanda7
 
 ---
 
