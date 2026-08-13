@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS, BUS_LAYOUT, getSeatLabel, getSeatPrice, getSeatId, getSeatPosition, MAX_SEATS_PER_BOOKING, FONT_FAMILY } from '../constants/busConfig';
 import { Seat, BusType, Booking, BookingItem } from '../types';
 import { getBookedSeats, saveBooking, markSeatsAsBooked, generateBookingId } from '../storage/bookingStorage';
+import { useNavigation } from '@react-navigation/native';
 
 // ── Dummy Data Generator ────────────────────────
 function generateSeats(busType: BusType): Seat[] {
@@ -38,8 +39,7 @@ export default function SeatSelectionScreen() {
   const [isDateModalVisible, setIsDateModalVisible] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Temporary fixed departure date (matching header)
-  const departureDate = '2023-10-24';
+  const navigation = useNavigation();
 
   useEffect(() => {
     // regenerate seats when bus type changes and clear selection
@@ -186,6 +186,9 @@ export default function SeatSelectionScreen() {
         {/* 1. App Header & Trip Info */}
         <View style={styles.appHeaderRow}>
           <Text style={styles.appTitle}>TrekBus</Text>
+          <TouchableOpacity onPress={() => (navigation as any).navigate('SalesHistory')} style={styles.headerIcon}>
+            <Ionicons name="receipt-outline" size={22} color={COLORS.primary} />
+          </TouchableOpacity>
         </View>
 
         <View style={styles.headerCard}>
@@ -535,6 +538,9 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: COLORS.primary,
     fontFamily: FONT_FAMILY,
+  },
+  headerIcon: {
+    padding: SPACING.xs,
   },
   modalOverlay: {
     flex: 1,
