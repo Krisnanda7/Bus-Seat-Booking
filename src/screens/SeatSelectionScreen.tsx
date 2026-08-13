@@ -34,13 +34,16 @@ export default function SeatSelectionScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         
-        {/* 1. Header Info (Trip & Date) */}
+        {/* 1. App Header & Trip Info */}
+        <View style={styles.appHeaderRow}>
+          <Text style={styles.appTitle}>TrekBus</Text>
+        </View>
+
         <View style={styles.headerCard}>
           <View style={styles.routeContainer}>
             <Ionicons name="bus" size={24} color={COLORS.primary} />
             <View style={styles.routeTextContainer}>
-              <Text style={styles.routeText}>Jakarta - Bandung</Text>
-              <Text style={styles.dateText}>24 Oct 2023</Text>
+              <Text style={styles.routeText}>Jakarta - Bandung • 24 Oct 2023</Text>
             </View>
           </View>
         </View>
@@ -325,5 +328,16 @@ const styles = StyleSheet.create({
     color: COLORS.textOnDark,
     fontWeight: '700',
     fontSize: 16,
+  },
+  appHeaderRow: {
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.sm,
+    paddingBottom: SPACING.xs,
+  },
+  appTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: COLORS.primary,
+    fontFamily: FONT_FAMILY,
   },
 });
